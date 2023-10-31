@@ -12,7 +12,7 @@ export const MovieCard = ({movieInfo, involucrados}) => {
         <img src={poster} alt="nombre" />
       </div>
       <div className='card__info'>
-        <p><span>Nombre: </span>{nombre}</p>
+        <p><span>Nombre: </span> <a href="">{nombre}</a></p>
         <p><span>Reseña: </span>{resena}</p>
         <p><span>Fecha: </span>{fecha}</p>
         <p><span>Actores: </span></p>
