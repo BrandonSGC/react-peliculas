@@ -21,7 +21,6 @@ export const MoviesList = () => {
           <MovieCard
             key={movie.movieInfo.peliculaID}
             movieInfo={movie.movieInfo}
-            involucrados={movie.involucrados}
           />
         ))}
       </div>
