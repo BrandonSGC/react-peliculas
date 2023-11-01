@@ -116,14 +116,14 @@ li {
 }
 
 /* MoviesList */
-.display {
+.moviesList__display {
   display: flex;
   flex-wrap: wrap;
   gap: 3rem;
 }
 
 @media (min-width: 1700px) {
-  .display {
+  .moviesList__display {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
   }

@@ -1,7 +1,7 @@
 
 export const MovieCard = ({movieInfo, involucrados}) => {
 
-  const { nombre, resena, fecha, poster } = movieInfo;
+  const { peliculaID, nombre, resena, fecha, poster } = movieInfo;
   const {  } = involucrados;
 
 
@@ -11,7 +11,7 @@ export const MovieCard = ({movieInfo, involucrados}) => {
         <img src={poster} alt="nombre" />
       </div>
       <div className='card__info'>
-        <p><span className='card__title'>Nombre: </span> <a href="">{nombre}</a></p>
+        <p><span className='card__title'>Nombre: </span> <a href={`/movies/${peliculaID}`}>{nombre}</a></p>
         <p><span className='card__title'>Reseña: </span>{resena}</p>
         <p><span className='card__title'>Fecha: </span>{fecha}</p>
         <p><span className='card__title'>Actores: </span></p>

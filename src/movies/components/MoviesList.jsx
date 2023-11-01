@@ -16,7 +16,7 @@ export const MoviesList = () => {
 
   return (
     <>
-      <div className="display">
+      <div className="moviesList__display">
         {movies.map((movie) => (
           <MovieCard
             key={movie.movieInfo.peliculaID}
