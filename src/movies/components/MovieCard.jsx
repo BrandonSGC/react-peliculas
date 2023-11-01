@@ -1,4 +1,3 @@
-import React from 'react'
 
 export const MovieCard = ({movieInfo, involucrados}) => {
 
@@ -12,10 +11,10 @@ export const MovieCard = ({movieInfo, involucrados}) => {
         <img src={poster} alt="nombre" />
       </div>
       <div className='card__info'>
-        <p><span>Nombre: </span> <a href="">{nombre}</a></p>
-        <p><span>Reseña: </span>{resena}</p>
-        <p><span>Fecha: </span>{fecha}</p>
-        <p><span>Actores: </span></p>
+        <p><span className='card__title'>Nombre: </span> <a href="">{nombre}</a></p>
+        <p><span className='card__title'>Reseña: </span>{resena}</p>
+        <p><span className='card__title'>Fecha: </span>{fecha}</p>
+        <p><span className='card__title'>Actores: </span></p>
       </div>
     </div>
   )
