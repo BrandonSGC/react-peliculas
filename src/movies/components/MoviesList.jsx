@@ -23,8 +23,8 @@ export const MoviesList = () => {
       <div className="moviesList__display">
         {movies.map((movie) => (
           <MovieCard
-            key={movie.movieInfo.peliculaID}
-            movieInfo={movie.movieInfo}
+            key={movie.peliculaID}
+            movie={movie}
           />
         ))}
       </div>

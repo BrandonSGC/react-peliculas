@@ -1,60 +1,80 @@
-import { useParams } from 'react-router-dom';
-import { getMovieInfoById } from '../helpers';
-import { useEffect, useState } from 'react';
+import { useParams } from "react-router-dom";
+import { getMovieInfoById } from "../helpers";
+import { useEffect, useState } from "react";
 
 export const MoviePage = () => {
   const [movie, setMovie] = useState({
-    peliculaID: '',
-    nombre: '',
-    fecha: '',
-    poster: '',
-    resena: ''
+    peliculaID: "",
+    nombre: "",
+    fecha: "",
+    poster: "",
+    resena: "",
+    calificaciones: {},
+    involucrados: [],
+    comentarios: [],
   });
+  // Destructuring of the move info.
+  const {
+    nombre,
+    fecha,
+    poster,
+    resena,
+    calificaciones: { calificacion, nombre_experto },
+    involucrados,
+    comentarios,
+  } = movie;
 
   // Get id from the url params...
   const { id } = useParams();
 
-  useEffect( () => {
+  useEffect(() => {
     const getMovieInfo = async () => {
       const data = await getMovieInfoById(id);
-      const objData = {
-        peliculaID: data.movieInfo.peliculaID,
-        nombre: data.movieInfo.nombre,
-        fecha: data.movieInfo.fecha,
-        poster: data.movieInfo.poster,
-        resena: data.movieInfo.resena
-      }
-      setMovie(objData);
-    }
-
+      setMovie(data);
+    };
     getMovieInfo();
   }, []);
 
+  // NOTA: Hay que validar si tienen involucrados, comentarios,
+  // calificaciones, etc... Porque sino se cae la aplicacion.
+
   return (
-    <div className='container'>
+    <div className="container">
       <div className="moviePage__display">
-        <div>
-          <img src={movie.poster} alt={movie.nombre} />
+        <div className="moviePage__poster">
+          <img src={poster} alt={nombre} />
         </div>
-        <div>
-          <h2>{movie.nombre}</h2>
-          <p>{movie.resena}</p>
-          <p>{movie.fecha}</p>
-          <p><span>Calificacion: </span>...</p>
+
+        <div className="moviePage__info">
+          <h2>{nombre}</h2>
+          <p>
+            <span>Reseña:</span> {resena}
+          </p>
+          <p>
+            <span>Fecha:</span> {fecha}
+          </p>
+          <p>
+            <span>Calificacion: </span>{calificacion}, calificada por el experto "<span>{nombre_experto}</span>"
+          </p>
+
+          <section className="involved">
+            <h3>Involucrados:</h3>
+            <ul className="involved__list">
+              {involucrados.map((involucrado) => (
+                <li 
+                  key={involucrado.involucradoID}
+                  className="involved__person"
+                >
+                  <span>{involucrado.rol}:</span> {involucrado.nombre}
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
       </div>
-
-      <section>
-        <h2>Comentarios:</h2>
-      </section>
-
-      <section>
-        <h2>Involucrados:</h2>
-      </section>
-
-      <section>
-        <h2>Calificaciones:</h2>
-      </section>
+      
+      <h3 className="text-center">Comentarios:</h3>
+      
     </div>
-  )
-}
+  );
+};

@@ -1,5 +1,5 @@
-export const MovieCard = ({ movieInfo }) => {
-  const { peliculaID, nombre, resena, fecha, poster, involucrados } = movieInfo;
+export const MovieCard = ({ movie }) => {
+  const { peliculaID, nombre, resena, fecha, poster, involucrados } = movie;
 
   // Returns an array of actors filtered in order of importance.
   const actors = involucrados
