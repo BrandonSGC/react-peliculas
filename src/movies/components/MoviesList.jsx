@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { getTop5RecentMovies } from "../helpers";
 import { MovieCard } from "./MovieCard";
+import { Spinner } from "../../components/Spinner";
 
 export const MoviesList = () => {
   const [movies, setMovies] = useState([]);
@@ -16,12 +17,14 @@ export const MoviesList = () => {
 
   return (
     <>
+      {
+        (movies.length === 0) && <Spinner />
+      }
       <div className="moviesList__display">
         {movies.map((movie) => (
           <MovieCard
-            key={movie.movieInfo.peliculaID}
-            movieInfo={movie.movieInfo}
-            involucrados={movie.involucrados}
+            key={movie.peliculaID}
+            movie={movie}
           />
         ))}
       </div>
