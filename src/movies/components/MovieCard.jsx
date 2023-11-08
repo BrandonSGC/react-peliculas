@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const MovieCard = ({ movie }) => {
   const { peliculaID, nombre, resena, fecha, poster, involucrados } = movie;
 
@@ -14,8 +16,8 @@ export const MovieCard = ({ movie }) => {
       </div>
       <div className="card__info">
         <p>
-          <span className="card__title">Nombre: </span>{" "}
-          <a href={`/movies/${peliculaID}`}>{nombre}</a>
+          <span className="card__title">Nombre: </span>
+          <Link to={`/movies/${peliculaID}`}>{nombre}</Link>
         </p>
         <p>
           <span className="card__title">Reseña: </span>
