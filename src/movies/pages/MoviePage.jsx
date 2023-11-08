@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
-import { getMovieInfoById, createComment } from "../helpers";
+import { getMovieInfoById, createComment, deleteComment } from "../helpers";
 import { useEffect, useState } from "react";
+import { MovieDisplay } from "../components";
 
 export const MoviePage = () => {
   // Get id from the url params...
@@ -15,19 +16,9 @@ export const MoviePage = () => {
     involucrados: [],
     comentarios: [],
   });
-  
+  const { comentarios } = movie;
+
   const [comment, setComment] = useState({});
-  
-  // Destructuring of the move info.
-  const {
-    nombre,
-    fecha,
-    poster,
-    resena,
-    calificaciones: { calificacion, nombre_experto },
-    involucrados,
-    comentarios,
-  } = movie;
 
   useEffect(() => {
     const getMovieInfo = async () => {
@@ -37,87 +28,76 @@ export const MoviePage = () => {
     getMovieInfo();
   }, [id]);
 
-
   const handleInput = (evt) => {
     const newComment = {
       peliculaID: id,
       usuarioID: 1,
       contenido: evt.target.value,
       comentarioPadreID: null,
-      fecha: new Date().toISOString().split('T')[0]
+      fecha: new Date().toISOString().split("T")[0],
     };
     setComment(newComment);
 
-    // Control textarea height dynamically.
-    evt.target.style.height = 'auto';
+    evt.target.style.height = "auto";
     evt.target.style.height = `${evt.target.scrollHeight}px`;
-  }
+  };
 
   // NOTA: Hay que validar si tienen involucrados, comentarios,
   // calificaciones, etc... Porque sino se cae la aplicacion.
-
-  const sendComment = async () => {
+  const handleCreateComment = async () => {
     if (comment.contenido.trim().length === 0) return;
     await createComment(comment);
     const updatedMovie = await getMovieInfoById(id);
     setMovie(updatedMovie);
-    setComment({contenido: ''});
+    setComment({ contenido: "" });
   };
-  
+
+  const handleDeleteComment  = async (evt) => {
+    const idUsuario = evt.target.parentElement.id;
+    const idComentario = evt.target.parentElement.getAttribute('idc');
+
+    if (1 === parseInt(idUsuario)) {
+      await deleteComment(idComentario);
+      const updatedMovie = await getMovieInfoById(id);
+      setMovie(updatedMovie);
+    } else {
+      console.log(`No se puede eliminar...`);
+    }
+  }
 
   return (
     <div className="container">
-      <div className="moviePage__display">
-        <div className="moviePage__poster">
-          <img src={poster} alt={nombre} />
-        </div>
+      <MovieDisplay movie={movie} />
 
-        <div className="moviePage__info">
-          <h2>{nombre}</h2>
-          <p>
-            <span>Reseña:</span> {resena}
-          </p>
-          <p>
-            <span>Fecha:</span> {fecha}
-          </p>
-          <p>
-            <span>Calificacion: </span>
-            {calificacion}, calificada por el experto{" "}
-            <span>{nombre_experto}</span>
-          </p>
+      {/*Esta misma página permitirá que el 
+      usuario pueda: 
+      1. Agregar un nuevo comentario ✅
+      2. Responder un comentario existente 
+      3. Eliminar un comentario suyo previo ✅ */}
 
-          <section className="involved">
-            <h3>Involucrados:</h3>
-            <ul className="involved__list">
-              {involucrados.map((involucrado) => (
-                <li
-                  key={involucrado.involucradoID}
-                  className="involved__person"
-                >
-                  <span>{involucrado.rol}:</span> {involucrado.nombre}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-      </div>
-
-      {/*Esta misma página permitirá que el usuario
-      pueda agregar un nuevo comentario o
-      bien, responder un comentario existente, así
-      como eliminar un comentario suyo previo.*/}
       <h3 className="text-center">Comentarios:</h3>
       <ul className="comments">
-        {comentarios.map((comentario) => {
-          console.log(comentario.comentarioID);
-          return (
-          <li key={comentario.comentarioID} className="comments__box" id={comentario.comentarioID}>
-            <p className="comments__comment">{comentario.contenido}</p>
-            <button className="comments__reply">Responder</button>
-          </li>
-        )})}
-      </ul>
+        {comentarios.map((comentario) => (
+          <li
+            key={comentario.comentarioID}
+            className="comments__box"
+            id={comentario.usuarioID}
+            idc={comentario.comentarioID}
+          >
+            <div>
+              <p className="comments__comment">{comentario.contenido}</p>
+              <button className="comments__reply">Responder</button>
+            </div>
 
+            <img
+              className="comments__delete"
+              src="/assets/icons/delete .svg"
+              alt="delete"
+              onClick={handleDeleteComment}
+            />
+          </li>
+        ))}
+      </ul>
 
       <div className="commentBox">
         <textarea
@@ -128,7 +108,12 @@ export const MoviePage = () => {
           value={comment.contenido}
           onChange={handleInput}
         ></textarea>
-        <img onClick={sendComment} className="commentIcon" src="/assets/icons/send.svg" alt="send" />
+        <img
+          onClick={handleCreateComment}
+          className="commentIcon"
+          src="/assets/icons/send.svg"
+          alt="send"
+        />
       </div>
     </div>
   );

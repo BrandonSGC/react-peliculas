@@ -10,7 +10,6 @@ export const createComment = async (comment) => {
       body: JSON.stringify(comment)
     });
     const data = await response.json();
-    console.log(data);
   } catch (error) {
     console.log(error);
   }
