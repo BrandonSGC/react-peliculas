@@ -5,9 +5,7 @@ import { MoviePage, RecentMoviesPage } from '../movies/pages'
 export const AppRouter = () => {
   return (
     <Routes>
-      
       <Route path="/*" element={<RecentMoviesPage />} />
-      
       <Route path='movies/:id' element={<MoviePage />}/>
     </Routes>
   )

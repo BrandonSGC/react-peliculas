@@ -237,6 +237,10 @@ li {
 
 /* MOVIE PAGE */
 
+.moviePage__display {
+  margin-top: 1rem;
+}
+
 .moviePage__info span{
   font-weight: 700;
   color: #a2bed7;
@@ -252,6 +256,7 @@ li {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 3rem;
+    margin-top: 3rem;
   }
 
   .moviePage__poster {
@@ -272,5 +277,53 @@ li {
   .moviePage__info span {
     font-size: 1.8rem;
   }
+}
 
+
+.comments__box {
+  background-color: #293c51;
+  margin: 1rem 0;
+  padding: 2rem;
+}
+
+
+.comments__reply {
+  background: none;
+  border-radius: none;
+  padding: 0;
+  color: var(--white);
+  font-weight: lighter;
+  font-size: 1.4rem;
+}
+
+.comments__reply:hover {
+  color: #cedce9;
+  transition: .3s;
+}
+
+.commentBox {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.commentInput {
+  width: 100%;
+  padding: 1rem;
+  background-color: #cedce9;
+  padding-right: 6rem;
+}
+
+.commentBox img {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 4rem;
+}
+
+@media (min-width: 768px) {
+  .commentBox {
+    margin-bottom: 3rem;
+  }
 }
