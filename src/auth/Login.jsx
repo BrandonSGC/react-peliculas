@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CheckTokenExpiration from '../auth/CheckTokenExpiration';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loginAttempts, setLoginAttempts] = useState(0);
   const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -19,31 +21,87 @@ const Login = () => {
       },
       body: JSON.stringify(data)
     })
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        alert('Usuario y/o contraseña incorrectos');
-        throw new Error('Error en la autenticación');
-      }
-    })
-    .then(data => {
-      if (data && data.token) {
-        const token = data.token;
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return response.json().then(data => {
+            if (data && data.message === 'Credenciales inválidas o usuario inactivo') {
+              // Muestra una alerta si el usuario está inactivo
+              alert('Usuario inactivo');
+            }
+            throw new Error('Error en la autenticación');
+          });
+        }
+      })
+      .then(data => {
+        if (data && data.token) {
+          const token = data.token;
+      
+          // Almacena el token en el localStorage
+          localStorage.setItem('token', token);
+      
+          // Imprime el token en la consola
+          console.log('Token de acceso:', token);
+      
+          // Decodificar el token para obtener la información si es necesario
+          const decodedToken = parseJwt(token);
+      
+          if (decodedToken && decodedToken.exp) {
+            // Almacena el tiempo de expiración en el almacenamiento local
+            localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
+          }
+      
+          navigate('/recentmovies', { state: { checkToken: true } });
+        } else {
+          console.error('Token no encontrado en la respuesta');
+        }
+      })      
+      .catch(error => {
+        // Incrementa el contador de intentos fallidos solo si el usuario no está inactivo
+        if (!error.message.includes('usuario inactivo')) {
+          setLoginAttempts(prevAttempts => prevAttempts + 1);
+          
+          // Si se alcanzan tres intentos fallidos, muestra una alerta y realiza la acción deseada
+          if (loginAttempts + 1 >= 3) {
+            alert('Se inactivó el usuario');
+            // Aquí podrías realizar otra acción, como bloquear la cuenta, etc.
+          }
+        }
 
-        console.log('Token de acceso:', token);
-
-        localStorage.setItem('token', token);
-
-        navigate('/');
-      } else {
-        console.error('Token no encontrado en la respuesta');
-      }
-    })
-    .catch(error => {
-      console.error('Error en la solicitud POST', error);
-    });
+        console.error('Error en la solicitud POST', error);
+      });
   };
+
+  // Función para decodificar un token JWT
+  const parseJwt = token => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = JSON.parse(atob(base64));
+      return jsonPayload;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // Función para verificar la expiración del token
+  const isTokenExpired = () => {
+    const tokenExpiration = localStorage.getItem('tokenExpiration');
+    if (tokenExpiration && new Date().getTime() / 1000 > tokenExpiration) {
+      // Token expirado, realizar las acciones necesarias (por ejemplo, redirigir al inicio de sesión)
+      return true;
+    }
+    return false;
+  };
+
+  // Verificar la expiración del token al cargar el componente
+  useEffect(() => {
+    if (isTokenExpired()) {
+      // Realizar las acciones necesarias (por ejemplo, redirigir al inicio de sesión)
+      navigate('/');
+    }
+  }, [navigate]);
 
   return (
     <div className="login-container">
@@ -51,8 +109,8 @@ const Login = () => {
       <div className="search">
         <input
           type="text"
-          className="search__input"
-          placeholder="Nombre de Usuario"
+          className="input_login"
+          placeholder="Usuario"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
@@ -60,7 +118,7 @@ const Login = () => {
       <div className="search">
         <input
           type="password"
-          className="search__input"
+          className="input_login"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -70,6 +128,7 @@ const Login = () => {
         <button className="search__button" onClick={handleLogin}>
           Login
         </button>
+        <CheckTokenExpiration />
       </div>
     </div>
   );
