@@ -66,6 +66,7 @@ export const MoviePage = () => {
 
   const handleReplyComment = async (evt) => {
     const idComentarioPadre = parseInt(evt.target.parentElement.parentElement.getAttribute('idc'));
+    console.log(idComentarioPadre);
 
     const newReply = {
       peliculaID: id,
@@ -75,11 +76,7 @@ export const MoviePage = () => {
       fecha: new Date().toISOString().split("T")[0],
     };
     
-    setComment(newReply);
-    console.log(newReply);
-    console.log(comment);
-
-    await createComment(comment);
+    await createComment(newReply);
     const updatedMovie = await getMovieInfoById(id);
     setMovie(updatedMovie);
   }
