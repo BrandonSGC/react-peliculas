@@ -1,9 +1,13 @@
 import { useParams } from "react-router-dom";
 import { getMovieInfoById, createComment, deleteComment } from "../helpers";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MovieDisplay } from "../components";
+import { UserContext } from "../../context/UserContext";
 
 export const MoviePage = () => {
+
+  const { user } = useContext( UserContext );
+
   // Get id from the url params...
   const { id } = useParams();
   const [movie, setMovie] = useState({

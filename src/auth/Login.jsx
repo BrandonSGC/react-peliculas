@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CheckTokenExpiration from '../auth/CheckTokenExpiration';
+import { UserContext } from '../context/UserContext';
 
 const Login = () => {
+
+  const { setUser } = useContext(UserContext);
+
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -51,6 +56,9 @@ const Login = () => {
             // Almacena el tiempo de expiración en el almacenamiento local
             localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
           }
+
+          // Set username to the User Context.
+          setUser(username);
       
           navigate('/recentmovies', { state: { checkToken: true } });
         } else {
