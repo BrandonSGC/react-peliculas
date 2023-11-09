@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CheckTokenExpiration from '../auth/CheckTokenExpiration';
 import { UserContext } from '../context/UserContext';
 
@@ -20,8 +20,9 @@ const Login = () => {
       // Obtener el estado activo del usuario
       const activoResponse = await fetch(`http://localhost:3000/usuario/${username}/activo`);
       const activoData = await activoResponse.json();
+      console.log(activoData); // Agrega este console.log
   
-      if (activoData.activo === 1) {
+      if (activoData.activo === true) {
         // Si el usuario está activo, realizar la autenticación
         const response = await fetch('http://localhost:3000/login', {
           method: 'POST',
@@ -62,7 +63,7 @@ const Login = () => {
           // Incrementar el contador de intentos fallidos
           setFailedAttempts((prevAttempts) => prevAttempts + 1);
   
-          if (failedAttempts >= 2) {
+          if (failedAttempts >= 3) {
             // Informar a la API sobre intentos fallidos
             const updateFailedAttemptsResponse = await fetch('http://localhost:3000/updateFailedAttempts', {
               method: 'PUT',
@@ -149,6 +150,9 @@ const Login = () => {
           Login
         </button>
         <CheckTokenExpiration />
+      </div>
+      <div>
+        <Link to="/ingresarusuario">¿Desea Ingresar un Nuevo Usuario?</Link>
       </div>
     </div>
   );
