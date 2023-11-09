@@ -4,73 +4,89 @@ import CheckTokenExpiration from '../auth/CheckTokenExpiration';
 import { UserContext } from '../context/UserContext';
 
 const Login = () => {
-
   const { setUser } = useContext(UserContext);
-
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const navigate = useNavigate();
 
   const handleLogin = () => {
     const data = {
-        username: username,
-        password: password
+      username: username,
+      password: password,
     };
 
     fetch('http://localhost:3000/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.json().then(data => {
-                    throw new Error(data.message);
-                });
-            }
-        })
-        .then(data => {
-            if (data && data.token) {
-                const token = data.token;
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          // Incrementar el contador de intentos fallidos
+          setFailedAttempts((prevAttempts) => prevAttempts + 1);
 
-                // Almacena el token en el localStorage
-                localStorage.setItem('token', token);
+          return response.json().then((data) => {
+            throw new Error(data.message);
+          });
+        }
+      })
+      .then((data) => {
+        if (data && data.token) {
+          const token = data.token;
 
-                // Imprime el token en la consola
-                console.log('Token de acceso:', token);
+          // Almacena el token en el localStorage
+          localStorage.setItem('token', token);
 
-                // Decodificar el token para obtener la información si es necesario
-                const decodedToken = parseJwt(token);
+          // Imprime el token en la consola
+          console.log('Token de acceso:', token);
 
-                if (decodedToken && decodedToken.exp) {
-                    // Almacena el tiempo de expiración en el almacenamiento local
-                    localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
-                }
+          // Decodificar el token para obtener la información si es necesario
+          const decodedToken = parseJwt(token);
 
-                setUser(username);
-       
-            navigate('/recentmovies', { state: { checkToken: true } });
-            } else {
-                console.error('Token no encontrado en la respuesta');
-            }
-        })
-        .catch(error => {
-            console.error('Error en la solicitud POST', error);
+          if (decodedToken && decodedToken.exp) {
+            // Almacena el tiempo de expiración en el almacenamiento local
+            localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
+          }
 
-            if (error.message.includes('inactivo')) {
-                alert('Usuario inactivo. Contacta al soporte.');
-            } else if (error.message.includes('intentos fallidos')) {
-                alert('Has alcanzado tres intentos fallidos. Usuario inactivo.');
-            } else {
-                alert('Usuario y/o contraseña incorrectos');
-            }
-        });
-};
+          // Restablecer el contador de intentos fallidos
+          setFailedAttempts(0);
+
+          setUser(username);
+
+          navigate('/recentmovies', { state: { checkToken: true } });
+        }
+      })
+      .catch((error) => {
+        console.error('Error en la solicitud POST', error);
+
+        if (failedAttempts >= 2) {
+          // Si hay tres intentos fallidos, informar a la API
+          fetch('http://localhost:3000/updateFailedAttempts', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data.message);
+            })
+            .catch((error) => {
+              console.error('Error al informar intentos fallidos:', error);
+            });
+
+          alert('Has alcanzado tres intentos fallidos. Usuario inactivo.');
+        } else {
+          alert('Usuario y/o contraseña incorrectos');
+        }
+      });
+  };
 
   // Función para decodificar un token JWT
   const parseJwt = token => {
