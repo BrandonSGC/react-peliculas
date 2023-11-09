@@ -17,6 +17,8 @@ export const MoviePage = () => {
     comentarios: [],
   });
   const { comentarios } = movie;
+  
+  //console.log(comentarios);
 
   const [comment, setComment] = useState({});
 
@@ -46,11 +48,30 @@ export const MoviePage = () => {
   // calificaciones, etc... Porque sino se cae la aplicacion.
   const handleCreateComment = async () => {
     if (comment.contenido.trim().length === 0) return;
+    
     await createComment(comment);
     const updatedMovie = await getMovieInfoById(id);
     setMovie(updatedMovie);
     setComment({ contenido: "" });
   };
+
+  const handleReplyComment = async (evt) => {
+    const idComentarioPadre = parseInt(evt.target.parentElement.parentElement.getAttribute('idc'));
+
+    const newReply = {
+      peliculaID: id,
+      usuarioID: 1, 
+      contenido: comment.contenido, 
+      comentarioPadreID: idComentarioPadre,
+      fecha: new Date().toISOString().split("T")[0],
+    };
+    
+    console.log(newReply);
+    await createComment(comment);
+    const updatedMovie = await getMovieInfoById(id);
+    setMovie(updatedMovie);
+    setComment({ contenido: "" });
+  }
 
   const handleDeleteComment  = async (evt) => {
     const idUsuario = evt.target.parentElement.id;
@@ -86,7 +107,7 @@ export const MoviePage = () => {
           >
             <div>
               <p className="comments__comment">{comentario.contenido}</p>
-              <button className="comments__reply">Responder</button>
+              <button onClick={handleReplyComment} className="comments__reply">Responder</button>
             </div>
 
             <img
