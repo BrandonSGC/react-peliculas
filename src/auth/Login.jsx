@@ -5,73 +5,67 @@ import CheckTokenExpiration from '../auth/CheckTokenExpiration';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loginAttempts, setLoginAttempts] = useState(0);
   const navigate = useNavigate();
 
   const handleLogin = () => {
     const data = {
-      username: username,
-      password: password
+        username: username,
+        password: password
     };
 
     fetch('http://localhost:3000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
     })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          return response.json().then(data => {
-            if (data && data.message === 'Credenciales inválidas o usuario inactivo') {
-              // Muestra una alerta si el usuario está inactivo
-              alert('Usuario inactivo');
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.message);
+                });
             }
-            throw new Error('Error en la autenticación');
-          });
-        }
-      })
-      .then(data => {
-        if (data && data.token) {
-          const token = data.token;
-      
-          // Almacena el token en el localStorage
-          localStorage.setItem('token', token);
-      
-          // Imprime el token en la consola
-          console.log('Token de acceso:', token);
-      
-          // Decodificar el token para obtener la información si es necesario
-          const decodedToken = parseJwt(token);
-      
-          if (decodedToken && decodedToken.exp) {
-            // Almacena el tiempo de expiración en el almacenamiento local
-            localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
-          }
-      
-          navigate('/recentmovies', { state: { checkToken: true } });
-        } else {
-          console.error('Token no encontrado en la respuesta');
-        }
-      })      
-      .catch(error => {
-        // Incrementa el contador de intentos fallidos solo si el usuario no está inactivo
-        if (!error.message.includes('usuario inactivo')) {
-          setLoginAttempts(prevAttempts => prevAttempts + 1);
-          
-          // Si se alcanzan tres intentos fallidos, muestra una alerta y realiza la acción deseada
-          if (loginAttempts + 1 >= 3) {
-            alert('Se inactivó el usuario');
-            // Aquí podrías realizar otra acción, como bloquear la cuenta, etc.
-          }
-        }
+        })
+        .then(data => {
+            if (data && data.token) {
+                const token = data.token;
 
-        console.error('Error en la solicitud POST', error);
-      });
-  };
+                // Almacena el token en el localStorage
+                localStorage.setItem('token', token);
+
+                // Imprime el token en la consola
+                console.log('Token de acceso:', token);
+
+                // Decodificar el token para obtener la información si es necesario
+                const decodedToken = parseJwt(token);
+
+                if (decodedToken && decodedToken.exp) {
+                    // Almacena el tiempo de expiración en el almacenamiento local
+                    localStorage.setItem('tokenExpiration', decodedToken.exp * 1000); // Multiplica por 1000 para convertir a milisegundos
+                }
+
+                // Restablecer el contador de intentos fallidos
+                setUsername('');
+                setPassword('');
+            } else {
+                console.error('Token no encontrado en la respuesta');
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud POST', error);
+
+            if (error.message.includes('inactivo')) {
+                alert('Usuario inactivo. Contacta al soporte.');
+            } else if (error.message.includes('intentos fallidos')) {
+                alert('Has alcanzado tres intentos fallidos. Usuario inactivo.');
+            } else {
+                alert('Usuario y/o contraseña incorrectos');
+            }
+        });
+};
 
   // Función para decodificar un token JWT
   const parseJwt = token => {
