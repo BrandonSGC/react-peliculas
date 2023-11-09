@@ -4,3 +4,4 @@ export * from './createComment';
 export * from './deleteComment';
 export * from './searchMovies';
 export * from './postLogin';
+export * from './getUserInfoByUsername';
