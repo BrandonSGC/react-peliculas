@@ -61,31 +61,37 @@ const Login = () => {
           navigate('/recentmovies', { state: { checkToken: true } });
         }
       })
-      .catch((error) => {
-        console.error('Error en la solicitud POST', error);
+      // En el bloque catch
+.catch((error) => {
+  console.error('Error en la solicitud POST', error);
 
-        if (failedAttempts >= 2) {
-          // Si hay tres intentos fallidos, informar a la API
-          fetch('http://localhost:3000/updateFailedAttempts', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data.message);
-            })
-            .catch((error) => {
-              console.error('Error al informar intentos fallidos:', error);
-            });
+  // Incrementar el contador de intentos fallidos
+  setFailedAttempts((prevAttempts) => prevAttempts + 1);
 
-          alert('Has alcanzado tres intentos fallidos. Usuario inactivo.');
-        } else {
-          alert('Usuario y/o contraseña incorrectos');
-        }
-      });
+  if (failedAttempts >= 3) { // Aquí debería ser 2 en lugar de 3
+    // Si hay tres intentos fallidos, informar a la API
+    fetch('http://localhost:3000/updateFailedAttempts', {       
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username }),
+    })
+    
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.message);
+    })
+    .catch((error) => {
+      console.error('Error al informar intentos fallidos:', error);
+    });
+
+  alert('Has alcanzado tres intentos fallidos. Usuario inactivo.');
+  } else {
+    alert('Usuario y/o contraseña incorrectos');
+  }
+});
+
   };
 
   // Función para decodificar un token JWT
