@@ -23,7 +23,7 @@ export const MoviePage = () => {
     comentarios: [],
   });
   const { comentarios } = movie;
-  
+
   const [comment, setComment] = useState({});
 
   useEffect(() => {
@@ -75,11 +75,13 @@ export const MoviePage = () => {
       fecha: new Date().toISOString().split("T")[0],
     };
     
+    setComment(newReply);
     console.log(newReply);
+    console.log(comment);
+
     await createComment(comment);
     const updatedMovie = await getMovieInfoById(id);
     setMovie(updatedMovie);
-    setComment({ contenido: "" });
   }
 
   const handleDeleteComment  = async (evt) => {
