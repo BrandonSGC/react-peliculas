@@ -1,9 +1,15 @@
 import { useParams } from "react-router-dom";
-import { getMovieInfoById, createComment, deleteComment } from "../helpers";
-import { useEffect, useState } from "react";
+import { getMovieInfoById, createComment, deleteComment, getUserInfoByUsername } from "../helpers";
+import { useContext, useEffect, useState } from "react";
 import { MovieDisplay } from "../components";
+import { UserContext } from "../../context/UserContext";
 
 export const MoviePage = () => {
+
+  const { user } = useContext( UserContext );
+  const [userInfo, setUserInfo] = useState({});
+  const { usuarioID } = userInfo;
+
   // Get id from the url params...
   const { id } = useParams();
   const [movie, setMovie] = useState({
@@ -17,7 +23,7 @@ export const MoviePage = () => {
     comentarios: [],
   });
   const { comentarios } = movie;
-
+  
   const [comment, setComment] = useState({});
 
   useEffect(() => {
@@ -25,13 +31,18 @@ export const MoviePage = () => {
       const data = await getMovieInfoById(id);
       setMovie(data);
     };
+    const getUserInfo = async () => {
+      const userInfo = await getUserInfoByUsername(user);
+      setUserInfo(userInfo);
+    }
     getMovieInfo();
+    getUserInfo();
   }, [id]);
 
   const handleInput = (evt) => {
     const newComment = {
       peliculaID: id,
-      usuarioID: 1,
+      usuarioID: usuarioID,
       contenido: evt.target.value,
       comentarioPadreID: null,
       fecha: new Date().toISOString().split("T")[0],
@@ -46,34 +57,47 @@ export const MoviePage = () => {
   // calificaciones, etc... Porque sino se cae la aplicacion.
   const handleCreateComment = async () => {
     if (comment.contenido.trim().length === 0) return;
+    
     await createComment(comment);
     const updatedMovie = await getMovieInfoById(id);
     setMovie(updatedMovie);
     setComment({ contenido: "" });
   };
 
+  const handleReplyComment = async (evt) => {
+    const idComentarioPadre = parseInt(evt.target.parentElement.parentElement.getAttribute('idc'));
+
+    const newReply = {
+      peliculaID: id,
+      usuarioID: usuarioID, 
+      contenido: comment.contenido, 
+      comentarioPadreID: idComentarioPadre,
+      fecha: new Date().toISOString().split("T")[0],
+    };
+    
+    console.log(newReply);
+    await createComment(comment);
+    const updatedMovie = await getMovieInfoById(id);
+    setMovie(updatedMovie);
+    setComment({ contenido: "" });
+  }
+
   const handleDeleteComment  = async (evt) => {
     const idUsuario = evt.target.parentElement.id;
     const idComentario = evt.target.parentElement.getAttribute('idc');
 
-    if (1 === parseInt(idUsuario)) {
+    if (usuarioID === parseInt(idUsuario)) {
       await deleteComment(idComentario);
       const updatedMovie = await getMovieInfoById(id);
       setMovie(updatedMovie);
     } else {
-      console.log(`No se puede eliminar...`);
+      alert('Solo puedes eliminar tus comentarios')
     }
   }
 
   return (
     <div className="container">
       <MovieDisplay movie={movie} />
-
-      {/*Esta misma página permitirá que el 
-      usuario pueda: 
-      1. Agregar un nuevo comentario ✅
-      2. Responder un comentario existente 
-      3. Eliminar un comentario suyo previo ✅ */}
 
       <h3 className="text-center">Comentarios:</h3>
       <ul className="comments">
@@ -86,15 +110,17 @@ export const MoviePage = () => {
           >
             <div>
               <p className="comments__comment">{comentario.contenido}</p>
-              <button className="comments__reply">Responder</button>
+              <button onClick={handleReplyComment} className="comments__reply">Responder</button>
             </div>
 
-            <img
-              className="comments__delete"
-              src="/assets/icons/delete .svg"
-              alt="delete"
-              onClick={handleDeleteComment}
-            />
+            {usuarioID === comentario.usuarioID && (
+              <img
+                className="comments__delete"
+                src="/assets/icons/delete .svg"
+                alt="delete"
+                onClick={handleDeleteComment}
+              />
+            )}
           </li>
         ))}
       </ul>
