@@ -36,6 +36,7 @@ const Login = () => {
         }
       })
       .then((data) => {
+        setUser(username);
         if (data && data.token) {
           const token = data.token;
 
@@ -55,8 +56,6 @@ const Login = () => {
 
           // Restablecer el contador de intentos fallidos
           setFailedAttempts(0);
-
-          setUser(username);
 
           navigate('/recentmovies', { state: { checkToken: true } });
         }

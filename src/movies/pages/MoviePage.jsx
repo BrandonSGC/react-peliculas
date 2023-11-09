@@ -33,6 +33,7 @@ export const MoviePage = () => {
     };
     const getUserInfo = async () => {
       const userInfo = await getUserInfoByUsername(user);
+      console.log(userInfo);
       setUserInfo(userInfo);
     }
     getMovieInfo();
@@ -40,6 +41,7 @@ export const MoviePage = () => {
   }, [id]);
 
   const handleInput = (evt) => {
+    console.log(usuarioID);
     const newComment = {
       peliculaID: id,
       usuarioID: usuarioID,
@@ -125,20 +127,22 @@ export const MoviePage = () => {
       </ul>
 
       <div className="commentBox">
-        <textarea
-          className="commentInput"
-          name="commentBox"
-          id="commentBox"
-          placeholder="Escribe aquí tu comentario aquí..."
-          value={comment.contenido}
-          onChange={handleInput}
-        ></textarea>
-        <img
-          onClick={handleCreateComment}
-          className="commentIcon"
-          src="/assets/icons/send.svg"
-          alt="send"
-        />
+        <form>
+          <textarea
+            className="commentInput"
+            name="commentBox"
+            id="commentBox"
+            placeholder="Escribe aquí tu comentario aquí..."
+            value={comment.contenido}
+            onChange={handleInput}
+          ></textarea>
+          <img
+            onClick={handleCreateComment}
+            className="commentIcon"
+            src="/assets/icons/send.svg"
+            alt="send"
+          />
+        </form>
       </div>
     </div>
   );
